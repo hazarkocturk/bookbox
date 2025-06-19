@@ -1,34 +1,53 @@
-import React from 'react'
-import AppBar from '@mui/material/AppBar';
-import Typography from '@mui/material/Typography';
-import { SignedIn, UserButton } from '@clerk/nextjs';
+"use client";
 
+import React from "react";
+import AppBar, { AppBarProps } from "@mui/material/AppBar";
+import Toolbar from "@mui/material/Toolbar";
+import Typography from "@mui/material/Typography";
+import CssBaseline from "@mui/material/CssBaseline";
+import useScrollTrigger from "@mui/material/useScrollTrigger";
+import { SignedIn, UserButton } from "@clerk/nextjs";
+import type { Theme } from "@mui/material/styles";
 
-const Header = () => {
-    return (
-        <AppBar position='static'  className='flex flex-row justify-between'>
-            <Typography
-                variant="h6"
-                noWrap
-                component="a"
-                href="#app-bar-with-responsive-menu"
-                sx={{
-                    mr: 2,
-                    display: { xs: 'none', md: 'flex' },
-                    fontFamily: 'monospace',
-                    fontWeight: 700,
-                    letterSpacing: '.3rem',
-                    color: 'inherit',
-                    textDecoration: 'none',
-                }}
-            >
-                BOOKBOX
-            </Typography>
-            <SignedIn>
-                <UserButton />
-            </SignedIn>
-        </AppBar>
-    )
+interface Props {
+  window?: () => Window;
 }
 
-export default Header
+function ElevationScroll(props: { children: React.ReactElement; window?: () => Window }) {
+  const { children, window } = props;
+
+  const trigger = useScrollTrigger({
+    disableHysteresis: true,
+    threshold: 0,
+    target: window ? window() : undefined,
+  });
+
+  return React.cloneElement(children as React.ReactElement<AppBarProps>, {
+    elevation: trigger ? 4 : 0,
+    sx: (theme: Theme) => ({
+      backgroundColor: trigger ? "transparent" : theme.palette.divider,
+      backdropFilter: "blur(10px)",
+      transition: "background-color 0.3s ease",
+    }),
+  });
+}
+
+export default function Header(props: Props) {
+  return (
+    <>
+      <CssBaseline />
+      <ElevationScroll {...props}>
+        <AppBar position="sticky">
+          <Toolbar className="flex justify-between w-full">
+            <Typography variant="h6" component="div">
+              BookBox
+            </Typography>
+            <SignedIn>
+              <UserButton />
+            </SignedIn>
+          </Toolbar>
+        </AppBar>
+      </ElevationScroll>
+    </>
+  );
+}
